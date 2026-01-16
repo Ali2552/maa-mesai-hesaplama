@@ -1,0 +1,603 @@
+<!doctype html>
+<html lang="tr" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Maaş ve Tazminat Hesaplayıcı - Türkiye</title>
+  <meta name="description" content="Türkiye için maaş, mesai ücreti ve kıdem tazminatı hesaplayıcı. Güncel vergi dilimleri ve SGK kesintileri ile hesaplama yapın.">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .gradient-bg {
+      background: linear-gradient(135deg, #1e3a5f 0%, #0d1f33 100%);
+    }
+    .card-gradient {
+      background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+    }
+    .accent-gradient {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    .tab-active {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+      color: white;
+    }
+    .input-focus:focus {
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+    }
+    .ad-placeholder {
+      background: repeating-linear-gradient(
+        45deg,
+        #f1f5f9,
+        #f1f5f9 10px,
+        #e2e8f0 10px,
+        #e2e8f0 20px
+      );
+      border: 2px dashed #94a3b8;
+    }
+    .result-card {
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+      border-left: 4px solid #10b981;
+    }
+    .pulse-animation {
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full gradient-bg">
+  <div id="app-wrapper" class="h-full w-full overflow-auto"><!-- Header -->
+   <header class="py-6 px-4">
+    <div class="max-w-6xl mx-auto text-center">
+     <h1 id="site-title" class="text-3xl md:text-4xl font-bold text-white mb-2">💰 Maaş ve Tazminat Hesaplayıcı</h1>
+     <p id="site-subtitle" class="text-amber-200 text-lg">Türkiye için güncel hesaplamalar • 2025</p>
+    </div>
+   </header>
+   <div class="max-w-6xl mx-auto px-4 pb-8"><!-- Top Ad Banner -->
+    <div class="ad-placeholder rounded-xl p-4 mb-6 text-center">
+     <div class="flex items-center justify-center gap-2 text-slate-500">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path> <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
+      </svg><span class="font-medium">Google Adsense Reklam Alanı (728x90)</span>
+     </div>
+     <p class="text-xs text-slate-400 mt-1">Gerçek reklamlar için Adsense kodunu buraya ekleyin</p>
+    </div>
+    <div class="grid lg:grid-cols-4 gap-6"><!-- Main Content -->
+     <div class="lg:col-span-3"><!-- Tabs -->
+      <div class="flex flex-wrap gap-2 mb-6"><button onclick="switchTab('maas')" id="tab-maas" class="tab-active px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2"> <span>💵</span> Net Maaş </button> <button onclick="switchTab('mesai')" id="tab-mesai" class="bg-white/10 text-white hover:bg-white/20 px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2"> <span>⏰</span> Mesai Ücreti </button> <button onclick="switchTab('kidem')" id="tab-kidem" class="bg-white/10 text-white hover:bg-white/20 px-5 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center gap-2"> <span>📋</span> Kıdem Tazminatı </button>
+      </div><!-- Maaş Hesaplama -->
+      <div id="panel-maas" class="card-gradient rounded-2xl p-6 shadow-xl">
+       <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><span class="w-10 h-10 accent-gradient rounded-xl flex items-center justify-center text-white">💵</span> Net Maaş Hesaplama</h2>
+       <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">Brüt Maaş (₺)</label> <input type="number" id="brut-maas" placeholder="Örn: 50000" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg">
+        </div>
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">Medeni Durum</label> <select id="medeni-durum" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg bg-white"> <option value="bekar">Bekâr</option> <option value="evli">Evli (Eş Çalışmıyor)</option> <option value="evli-calisıyor">Evli (Eş Çalışıyor)</option> </select>
+        </div>
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">Çocuk Sayısı</label> <select id="cocuk-sayisi" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg bg-white"> <option value="0">Çocuk Yok</option> <option value="1">1 Çocuk</option> <option value="2">2 Çocuk</option> <option value="3">3 Çocuk</option> <option value="4">4+ Çocuk</option> </select>
+        </div>
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">Engel Durumu</label> <select id="engel-durumu" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg bg-white"> <option value="yok">Engel Yok</option> <option value="1">1. Derece (%80+)</option> <option value="2">2. Derece (%60-79)</option> <option value="3">3. Derece (%40-59)</option> </select>
+        </div>
+       </div><button onclick="hesaplaMaas()" class="w-full accent-gradient text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"> 🧮 Hesapla </button>
+       <div id="maas-sonuc" class="mt-6 hidden">
+        <div class="result-card rounded-xl p-5">
+         <h3 class="font-bold text-emerald-800 text-lg mb-4">📊 Hesaplama Sonucu</h3>
+         <div class="space-y-3" id="maas-detay"></div>
+        </div>
+       </div>
+      </div><!-- Mesai Hesaplama -->
+      <div id="panel-mesai" class="card-gradient rounded-2xl p-6 shadow-xl hidden">
+       <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><span class="w-10 h-10 accent-gradient rounded-xl flex items-center justify-center text-white">⏰</span> Mesai Ücreti Hesaplama</h2>
+       <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">Aylık Brüt Maaş (₺)</label> <input type="number" id="mesai-maas" placeholder="Örn: 50000" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg">
+        </div>
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">Haftalık Çalışma Saati</label> <input type="number" id="haftalik-saat" value="45" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg">
+        </div>
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">Normal Mesai Saati</label> <input type="number" id="normal-mesai" placeholder="Hafta içi fazla çalışma" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg">
+        </div>
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">Hafta Sonu Mesai Saati</label> <input type="number" id="haftasonu-mesai" placeholder="Cumartesi/Pazar" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg">
+        </div>
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">Resmi Tatil Mesai Saati</label> <input type="number" id="tatil-mesai" placeholder="Resmi tatillerde" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg">
+        </div>
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">Gece Mesai Saati (22:00-06:00)</label> <input type="number" id="gece-mesai" placeholder="Gece vardiyası" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg">
+        </div>
+       </div><button onclick="hesaplaMesai()" class="w-full accent-gradient text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"> 🧮 Hesapla </button>
+       <div id="mesai-sonuc" class="mt-6 hidden">
+        <div class="result-card rounded-xl p-5">
+         <h3 class="font-bold text-emerald-800 text-lg mb-4">📊 Mesai Hesaplama Sonucu</h3>
+         <div class="space-y-3" id="mesai-detay"></div>
+        </div>
+       </div>
+      </div><!-- Kıdem Tazminatı Hesaplama -->
+      <div id="panel-kidem" class="card-gradient rounded-2xl p-6 shadow-xl hidden">
+       <h2 class="text-xl font-bold text-slate-800 mb-6 flex items-center gap-2"><span class="w-10 h-10 accent-gradient rounded-xl flex items-center justify-center text-white">📋</span> Kıdem Tazminatı Hesaplama</h2>
+       <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">İşe Başlama Tarihi</label> <input type="date" id="ise-baslama" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg">
+        </div>
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">İşten Ayrılma Tarihi</label> <input type="date" id="isten-ayrilma" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg">
+        </div>
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">Son Brüt Maaş (₺)</label> <input type="number" id="kidem-maas" placeholder="Örn: 50000" class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg">
+        </div>
+        <div><label class="block text-sm font-semibold text-slate-700 mb-2">Ek Ödemeler (₺/Ay)</label> <input type="number" id="ek-odemeler" placeholder="Yol, yemek, ikramiye vb." class="w-full px-4 py-3 border-2 border-slate-200 rounded-xl input-focus transition-all outline-none text-lg">
+        </div>
+       </div>
+       <div class="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6">
+        <p class="text-amber-800 text-sm"><strong>⚠️ Not:</strong> 2025 yılı kıdem tazminatı tavanı <strong>35.058,58 ₺</strong>'dir. Giydirilmiş brüt maaş bu tutarı aşarsa, tavan üzerinden hesaplama yapılır.</p>
+       </div><button onclick="hesaplaKidem()" class="w-full accent-gradient text-white py-4 rounded-xl font-bold text-lg hover:opacity-90 transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"> 🧮 Hesapla </button>
+       <div id="kidem-sonuc" class="mt-6 hidden">
+        <div class="result-card rounded-xl p-5">
+         <h3 class="font-bold text-emerald-800 text-lg mb-4">📊 Kıdem Tazminatı Sonucu</h3>
+         <div class="space-y-3" id="kidem-detay"></div>
+        </div>
+       </div>
+      </div><!-- Middle Ad -->
+      <div class="ad-placeholder rounded-xl p-4 mt-6 text-center">
+       <div class="flex items-center justify-center gap-2 text-slate-500">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+        </svg><span class="font-medium">Google Adsense Reklam Alanı (336x280)</span>
+       </div>
+      </div><!-- Info Section -->
+      <div class="card-gradient rounded-2xl p-6 shadow-xl mt-6">
+       <h3 class="text-lg font-bold text-slate-800 mb-4">📚 2025 Yılı Güncel Bilgiler</h3>
+       <div class="grid md:grid-cols-2 gap-4 text-sm">
+        <div class="bg-blue-50 rounded-xl p-4">
+         <h4 class="font-semibold text-blue-800 mb-2">SGK Kesintileri</h4>
+         <ul class="text-blue-700 space-y-1">
+          <li>• SGK İşçi Payı: %14</li>
+          <li>• İşsizlik Sigortası: %1</li>
+          <li>• Toplam SGK: %15</li>
+         </ul>
+        </div>
+        <div class="bg-purple-50 rounded-xl p-4">
+         <h4 class="font-semibold text-purple-800 mb-2">Gelir Vergisi Dilimleri</h4>
+         <ul class="text-purple-700 space-y-1">
+          <li>• 0-158.000₺: %15</li>
+          <li>• 158.000-330.000₺: %20</li>
+          <li>• 330.000-800.000₺: %27</li>
+          <li>• 800.000-4.300.000₺: %35</li>
+          <li>• 4.300.000₺+: %40</li>
+         </ul>
+        </div>
+        <div class="bg-green-50 rounded-xl p-4">
+         <h4 class="font-semibold text-green-800 mb-2">Mesai Çarpanları</h4>
+         <ul class="text-green-700 space-y-1">
+          <li>• Hafta içi mesai: x1.5</li>
+          <li>• Hafta sonu: x2.0</li>
+          <li>• Resmi tatil: x3.0</li>
+          <li>• Gece mesaisi: +%10</li>
+         </ul>
+        </div>
+        <div class="bg-orange-50 rounded-xl p-4">
+         <h4 class="font-semibold text-orange-800 mb-2">Asgari Ücret 2025</h4>
+         <ul class="text-orange-700 space-y-1">
+          <li>• Brüt: 26.005,50 ₺</li>
+          <li>• Net: 22.104,67 ₺</li>
+          <li>• Kıdem Tavanı: 35.058,58 ₺</li>
+         </ul>
+        </div>
+       </div>
+      </div>
+     </div><!-- Sidebar Ads -->
+     <div class="lg:col-span-1 space-y-6">
+      <div class="ad-placeholder rounded-xl p-6 text-center sticky top-4">
+       <div class="flex flex-col items-center gap-2 text-slate-500">
+        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
+        </svg><span class="font-medium">Reklam Alanı</span> <span class="text-xs">(300x600)</span>
+       </div>
+       <p class="text-xs text-slate-400 mt-3">Google Adsense kodunu buraya ekleyin</p>
+      </div>
+      <div class="card-gradient rounded-xl p-4 shadow-lg">
+       <h4 class="font-bold text-slate-800 mb-3 text-sm">🔥 Popüler Hesaplamalar</h4>
+       <ul class="text-sm space-y-2 text-slate-600">
+        <li class="flex items-center gap-2 cursor-pointer hover:text-amber-600" onclick="switchTab('maas')"><span>💵</span> Net Maaş Hesaplama</li>
+        <li class="flex items-center gap-2 cursor-pointer hover:text-amber-600" onclick="switchTab('mesai')"><span>⏰</span> Mesai Ücreti</li>
+        <li class="flex items-center gap-2 cursor-pointer hover:text-amber-600" onclick="switchTab('kidem')"><span>📋</span> Kıdem Tazminatı</li>
+       </ul>
+      </div>
+      <div class="ad-placeholder rounded-xl p-4 text-center"><span class="text-slate-500 text-sm font-medium">Reklam (300x250)</span>
+      </div>
+     </div>
+    </div>
+   </div><!-- Footer -->
+   <footer class="bg-slate-900 py-8 px-4 mt-8">
+    <div class="max-w-6xl mx-auto">
+     <div class="text-center">
+      <p id="footer-text" class="text-slate-400 text-sm">© 2025 Maaş Hesaplayıcı. Tüm hakları saklıdır.</p>
+      <p class="text-slate-500 text-xs mt-2">Bu hesaplamalar bilgi amaçlıdır. Kesin sonuçlar için muhasebeciye danışınız.</p>
+     </div><!-- Footer Ad -->
+     <div class="ad-placeholder rounded-xl p-4 mt-6 text-center"><span class="text-slate-500 text-sm font-medium">Google Adsense Reklam Alanı (728x90)</span>
+     </div>
+    </div>
+   </footer>
+  </div>
+  <script>
+    // Default configuration
+    const defaultConfig = {
+      site_title: '💰 Maaş ve Tazminat Hesaplayıcı',
+      site_subtitle: 'Türkiye için güncel hesaplamalar • 2025',
+      footer_text: '© 2025 Maaş Hesaplayıcı. Tüm hakları saklıdır.',
+      primary_color: '#1e3a5f',
+      accent_color: '#f59e0b',
+      text_color: '#1e293b',
+      surface_color: '#ffffff',
+      secondary_action_color: '#64748b'
+    };
+
+    // Format currency
+    function formatMoney(amount) {
+      return new Intl.NumberFormat('tr-TR', { 
+        style: 'currency', 
+        currency: 'TRY',
+        minimumFractionDigits: 2 
+      }).format(amount);
+    }
+
+    // Tab switching
+    function switchTab(tab) {
+      const tabs = ['maas', 'mesai', 'kidem'];
+      tabs.forEach(t => {
+        document.getElementById(`panel-${t}`).classList.add('hidden');
+        document.getElementById(`tab-${t}`).classList.remove('tab-active');
+        document.getElementById(`tab-${t}`).classList.add('bg-white/10', 'text-white');
+      });
+      document.getElementById(`panel-${tab}`).classList.remove('hidden');
+      document.getElementById(`tab-${tab}`).classList.add('tab-active');
+      document.getElementById(`tab-${tab}`).classList.remove('bg-white/10', 'text-white');
+    }
+
+    // Calculate income tax based on 2025 brackets
+    function calculateIncomeTax(annualIncome) {
+      const brackets = [
+        { limit: 158000, rate: 0.15 },
+        { limit: 330000, rate: 0.20 },
+        { limit: 800000, rate: 0.27 },
+        { limit: 4300000, rate: 0.35 },
+        { limit: Infinity, rate: 0.40 }
+      ];
+      
+      let tax = 0;
+      let remaining = annualIncome;
+      let prevLimit = 0;
+      
+      for (const bracket of brackets) {
+        const taxableInThisBracket = Math.min(remaining, bracket.limit - prevLimit);
+        if (taxableInThisBracket <= 0) break;
+        tax += taxableInThisBracket * bracket.rate;
+        remaining -= taxableInThisBracket;
+        prevLimit = bracket.limit;
+      }
+      
+      return tax;
+    }
+
+    // Net salary calculation
+    function hesaplaMaas() {
+      const brutMaas = parseFloat(document.getElementById('brut-maas').value) || 0;
+      const medeniDurum = document.getElementById('medeni-durum').value;
+      const cocukSayisi = parseInt(document.getElementById('cocuk-sayisi').value) || 0;
+      const engelDurumu = document.getElementById('engel-durumu').value;
+      
+      if (brutMaas <= 0) {
+        showError('maas-sonuc', 'Lütfen geçerli bir brüt maaş giriniz.');
+        return;
+      }
+
+      // SGK calculations
+      const sgkIsci = brutMaas * 0.14;
+      const issizlik = brutMaas * 0.01;
+      const toplamSgk = sgkIsci + issizlik;
+      
+      // Tax base
+      const vergiMatrahi = brutMaas - toplamSgk;
+      
+      // Annual income for progressive tax
+      const yillikGelir = vergiMatrahi * 12;
+      const yillikVergi = calculateIncomeTax(yillikGelir);
+      const aylikVergi = yillikVergi / 12;
+      
+      // Disability exemption (2025)
+      let engelIndirimi = 0;
+      if (engelDurumu === '1') engelIndirimi = 6900;
+      else if (engelDurumu === '2') engelIndirimi = 4000;
+      else if (engelDurumu === '3') engelIndirimi = 1700;
+      
+      // Minimum wage exemption (2025 - for income tax)
+      const asgariUcretBrut = 26005.50;
+      const asgariUcretVergiMatrahi = asgariUcretBrut * 0.85; // After SGK
+      const asgariUcretYillikVergi = calculateIncomeTax(asgariUcretVergiMatrahi * 12);
+      const asgariUcretAylikVergi = asgariUcretYillikVergi / 12;
+      
+      // Final tax after exemptions
+      const vergiSonrasi = Math.max(0, aylikVergi - asgariUcretAylikVergi - engelIndirimi);
+      
+      // Stamp tax
+      const damgaVergisi = brutMaas * 0.00759;
+      
+      // Net salary
+      const netMaas = brutMaas - toplamSgk - vergiSonrasi - damgaVergisi;
+      
+      const sonucDiv = document.getElementById('maas-sonuc');
+      const detayDiv = document.getElementById('maas-detay');
+      
+      detayDiv.innerHTML = `
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Brüt Maaş</span>
+          <span class="font-semibold">${formatMoney(brutMaas)}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">SGK İşçi Payı (%14)</span>
+          <span class="text-red-600">-${formatMoney(sgkIsci)}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">İşsizlik Sigortası (%1)</span>
+          <span class="text-red-600">-${formatMoney(issizlik)}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Gelir Vergisi</span>
+          <span class="text-red-600">-${formatMoney(vergiSonrasi)}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Damga Vergisi</span>
+          <span class="text-red-600">-${formatMoney(damgaVergisi)}</span>
+        </div>
+        <div class="flex justify-between py-3 bg-emerald-100 rounded-lg px-3 mt-2">
+          <span class="font-bold text-emerald-800 text-lg">Net Maaş</span>
+          <span class="font-bold text-emerald-800 text-lg">${formatMoney(netMaas)}</span>
+        </div>
+      `;
+      
+      sonucDiv.classList.remove('hidden');
+    }
+
+    // Overtime calculation
+    function hesaplaMesai() {
+      const aylikMaas = parseFloat(document.getElementById('mesai-maas').value) || 0;
+      const haftalikSaat = parseFloat(document.getElementById('haftalik-saat').value) || 45;
+      const normalMesai = parseFloat(document.getElementById('normal-mesai').value) || 0;
+      const haftasonuMesai = parseFloat(document.getElementById('haftasonu-mesai').value) || 0;
+      const tatilMesai = parseFloat(document.getElementById('tatil-mesai').value) || 0;
+      const geceMesai = parseFloat(document.getElementById('gece-mesai').value) || 0;
+      
+      if (aylikMaas <= 0) {
+        showError('mesai-sonuc', 'Lütfen geçerli bir maaş giriniz.');
+        return;
+      }
+      
+      // Hourly wage calculation
+      const aylikCalismaSaati = (haftalikSaat * 52) / 12;
+      const saatlikUcret = aylikMaas / aylikCalismaSaati;
+      
+      // Overtime calculations
+      const normalMesaiUcreti = normalMesai * saatlikUcret * 1.5;
+      const haftasonuMesaiUcreti = haftasonuMesai * saatlikUcret * 2.0;
+      const tatilMesaiUcreti = tatilMesai * saatlikUcret * 3.0;
+      const geceMesaiUcreti = geceMesai * saatlikUcret * 1.5 * 1.1; // Night shift +10%
+      
+      const toplamMesai = normalMesaiUcreti + haftasonuMesaiUcreti + tatilMesaiUcreti + geceMesaiUcreti;
+      
+      const sonucDiv = document.getElementById('mesai-sonuc');
+      const detayDiv = document.getElementById('mesai-detay');
+      
+      detayDiv.innerHTML = `
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Saatlik Ücret</span>
+          <span class="font-semibold">${formatMoney(saatlikUcret)}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Normal Mesai (${normalMesai} saat x1.5)</span>
+          <span class="text-emerald-600">+${formatMoney(normalMesaiUcreti)}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Hafta Sonu (${haftasonuMesai} saat x2.0)</span>
+          <span class="text-emerald-600">+${formatMoney(haftasonuMesaiUcreti)}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Resmi Tatil (${tatilMesai} saat x3.0)</span>
+          <span class="text-emerald-600">+${formatMoney(tatilMesaiUcreti)}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Gece Mesaisi (${geceMesai} saat x1.65)</span>
+          <span class="text-emerald-600">+${formatMoney(geceMesaiUcreti)}</span>
+        </div>
+        <div class="flex justify-between py-3 bg-emerald-100 rounded-lg px-3 mt-2">
+          <span class="font-bold text-emerald-800 text-lg">Toplam Mesai Ücreti</span>
+          <span class="font-bold text-emerald-800 text-lg">${formatMoney(toplamMesai)}</span>
+        </div>
+      `;
+      
+      sonucDiv.classList.remove('hidden');
+    }
+
+    // Severance pay calculation
+    function hesaplaKidem() {
+      const iseBaslama = document.getElementById('ise-baslama').value;
+      const istenAyrilma = document.getElementById('isten-ayrilma').value;
+      const brutMaas = parseFloat(document.getElementById('kidem-maas').value) || 0;
+      const ekOdemeler = parseFloat(document.getElementById('ek-odemeler').value) || 0;
+      
+      if (!iseBaslama || !istenAyrilma || brutMaas <= 0) {
+        showError('kidem-sonuc', 'Lütfen tüm alanları doldurunuz.');
+        return;
+      }
+      
+      const baslangic = new Date(iseBaslama);
+      const bitis = new Date(istenAyrilma);
+      
+      if (bitis <= baslangic) {
+        showError('kidem-sonuc', 'İşten ayrılma tarihi, işe başlama tarihinden sonra olmalıdır.');
+        return;
+      }
+      
+      // Calculate years, months, days
+      let yil = bitis.getFullYear() - baslangic.getFullYear();
+      let ay = bitis.getMonth() - baslangic.getMonth();
+      let gun = bitis.getDate() - baslangic.getDate();
+      
+      if (gun < 0) {
+        ay--;
+        gun += 30;
+      }
+      if (ay < 0) {
+        yil--;
+        ay += 12;
+      }
+      
+      // Total years as decimal
+      const toplamYil = yil + (ay / 12) + (gun / 365);
+      
+      // Gross salary with additions (giydirilmiş brüt)
+      const giydirilmisBrut = brutMaas + ekOdemeler;
+      
+      // 2025 severance cap
+      const kidemTavani = 35058.58;
+      const hesaplamaBrut = Math.min(giydirilmisBrut, kidemTavani);
+      
+      // Severance calculation: 1 month salary per year
+      const kidemTazminati = hesaplamaBrut * toplamYil;
+      
+      // Stamp tax (only stamp tax applies to severance)
+      const damgaVergisi = kidemTazminati * 0.00759;
+      const netKidem = kidemTazminati - damgaVergisi;
+      
+      const sonucDiv = document.getElementById('kidem-sonuc');
+      const detayDiv = document.getElementById('kidem-detay');
+      
+      let tavanUyari = '';
+      if (giydirilmisBrut > kidemTavani) {
+        tavanUyari = `
+          <div class="bg-amber-100 rounded-lg p-3 mb-3">
+            <p class="text-amber-800 text-sm">⚠️ Giydirilmiş brüt maaşınız (${formatMoney(giydirilmisBrut)}) tavan tutarını aştığı için hesaplama ${formatMoney(kidemTavani)} üzerinden yapılmıştır.</p>
+          </div>
+        `;
+      }
+      
+      detayDiv.innerHTML = `
+        ${tavanUyari}
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Çalışma Süresi</span>
+          <span class="font-semibold">${yil} yıl ${ay} ay ${gun} gün</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Giydirilmiş Brüt</span>
+          <span class="font-semibold">${formatMoney(giydirilmisBrut)}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Hesaplamaya Esas Tutar</span>
+          <span class="font-semibold">${formatMoney(hesaplamaBrut)}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Brüt Kıdem Tazminatı</span>
+          <span class="font-semibold">${formatMoney(kidemTazminati)}</span>
+        </div>
+        <div class="flex justify-between py-2 border-b border-emerald-200">
+          <span class="text-slate-600">Damga Vergisi (%0.759)</span>
+          <span class="text-red-600">-${formatMoney(damgaVergisi)}</span>
+        </div>
+        <div class="flex justify-between py-3 bg-emerald-100 rounded-lg px-3 mt-2">
+          <span class="font-bold text-emerald-800 text-lg">Net Kıdem Tazminatı</span>
+          <span class="font-bold text-emerald-800 text-lg">${formatMoney(netKidem)}</span>
+        </div>
+      `;
+      
+      sonucDiv.classList.remove('hidden');
+    }
+
+    // Show error message
+    function showError(containerId, message) {
+      const container = document.getElementById(containerId);
+      const detailId = containerId.replace('-sonuc', '-detay');
+      const detailDiv = document.getElementById(detailId);
+      
+      detailDiv.innerHTML = `
+        <div class="bg-red-100 border border-red-300 rounded-lg p-4 text-red-700">
+          <p class="font-medium">⚠️ ${message}</p>
+        </div>
+      `;
+      container.classList.remove('hidden');
+    }
+
+    // Element SDK initialization
+    async function onConfigChange(config) {
+      document.getElementById('site-title').textContent = config.site_title || defaultConfig.site_title;
+      document.getElementById('site-subtitle').textContent = config.site_subtitle || defaultConfig.site_subtitle;
+      document.getElementById('footer-text').textContent = config.footer_text || defaultConfig.footer_text;
+    }
+
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.primary_color || defaultConfig.primary_color,
+            set: (value) => {
+              config.primary_color = value;
+              window.elementSdk.setConfig({ primary_color: value });
+            }
+          },
+          {
+            get: () => config.accent_color || defaultConfig.accent_color,
+            set: (value) => {
+              config.accent_color = value;
+              window.elementSdk.setConfig({ accent_color: value });
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => config.surface_color || defaultConfig.surface_color,
+            set: (value) => {
+              config.surface_color = value;
+              window.elementSdk.setConfig({ surface_color: value });
+            }
+          },
+          {
+            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (value) => {
+              config.secondary_action_color = value;
+              window.elementSdk.setConfig({ secondary_action_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ['site_title', config.site_title || defaultConfig.site_title],
+        ['site_subtitle', config.site_subtitle || defaultConfig.site_subtitle],
+        ['footer_text', config.footer_text || defaultConfig.footer_text]
+      ]);
+    }
+
+    // Initialize SDK
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    // Set default date for severance calculation
+    document.getElementById('isten-ayrilma').valueAsDate = new Date();
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9bef21e8c2e23101',t:'MTc2ODU4MjQ0Mi4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
